@@ -3,7 +3,12 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+#Build Output
+/out/
+/build/
+
 ### IntelliJ IDEA ###
+.idea/
 .idea/modules.xml
 .idea/jarRepositories.xml
 .idea/compiler.xml
