@@ -12,7 +12,7 @@ public class WavFileDecoder {
     private int fileSize, chunkSize, dataSize;
     private int sampleRate, byteRate;
     private short audioFormat, numChannels, blockAlign, bitsPerSample;
-    private final String fileLoc = "src/com/quinton/media/in/Backstreet_Brawler_140bpm_120s.wav";
+    private final String fileLoc = "";
 
     /**
      * Prints the contents of the WAVE file to console.
