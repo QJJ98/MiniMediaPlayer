@@ -1,10 +1,10 @@
-package com.quinton;
+package com.quinton.media;
 
 /**
  * Hello world!
  *
  */
-public class App 
+public class MiniMediaPlayerApp
 {
     public static void main( String[] args )
     {
