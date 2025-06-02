@@ -12,7 +12,7 @@ public class WavFileDecoder {
     private int fileSize, chunkSize, dataSize;
     private int sampleRate, byteRate;
     private short audioFormat, numChannels, blockAlign, bitsPerSample;
-    private final String fileLoc = "";
+    private final String fileLoc = "src/main/resources/audio/wav/Backstreet_Brawler_140bpm_120s.wav"; // Test
 
     /**
      * Prints the contents of the WAVE file to console.
@@ -46,7 +46,24 @@ public class WavFileDecoder {
             is.readFully(dataID);
             dataSize = Integer.reverseBytes(is.readInt());
 
+            // Decode PCM Samples
 
+            // We know bytes per sample from extraction earlier (16 bits in this example)
+            // (16 bit-stereo = 2 bytes per channel x 2 channels = 4 bytes per frame)
+            byte[] frame = new byte[4];
+            // Calculate the total number of sample frames by dividing the data chunk segment size by 4 bytes
+            // In this example, the total number of sample frames is 5292467
+            int totalSampleFrames = dataSize / 4;
+            System.out.println("Total Sample Frames: " + totalSampleFrames);
+            // Calculate the total number of samples by multiplying the number of sample frames by 2 channels for
+            // each frame
+            int totalSamples = totalSampleFrames * 2;
+            for (int f = 0; f < totalSampleFrames; f++) {
+                // Left & Right Channel
+                for (int c = 0; c < 2; c++) {
+
+                }
+            }
 
         } catch (FileNotFoundException fnf) {
             System.err.println("The file: " + wavFile.getName() + " was not found.");
