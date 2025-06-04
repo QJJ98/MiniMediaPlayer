@@ -1,6 +1,8 @@
 package com.quinton.media.io.decoder.wav;
 
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.Files;
 
 /**
@@ -9,9 +11,10 @@ import java.nio.file.Files;
 public class WavFileDecoder {
 
     private byte[] riffID, filetypeID, chunkID, dataID;
-    private int fileSize, chunkSize, dataSize;
+    private int fileSize, chunkSize, dataChunkSize;
     private int sampleRate, byteRate;
     private short audioFormat, numChannels, blockAlign, bitsPerSample;
+    private short[] samples;
     private final String fileLoc = "src/main/resources/audio/wav/Backstreet_Brawler_140bpm_120s.wav"; // Test
 
     /**
@@ -44,25 +47,28 @@ public class WavFileDecoder {
             // Data Chunk (third 4 bytes)
             dataID = new byte[4];
             is.readFully(dataID);
-            dataSize = Integer.reverseBytes(is.readInt());
+            dataChunkSize = Integer.reverseBytes(is.readInt());
 
             // Decode PCM Samples
 
             // We know bytes per sample from extraction earlier (16 bits in this example)
             // (16 bit-stereo = 2 bytes per channel x 2 channels = 4 bytes per frame)
-            byte[] frame = new byte[4];
-            // Calculate the total number of sample frames by dividing the data chunk segment size by 4 bytes
-            // In this example, the total number of sample frames is 5292467
-            int totalSampleFrames = dataSize / 4;
-            System.out.println("Total Sample Frames: " + totalSampleFrames);
-            // Calculate the total number of samples by multiplying the number of sample frames by 2 channels for
-            // each frame
-            int totalSamples = totalSampleFrames * 2;
-            for (int f = 0; f < totalSampleFrames; f++) {
-                // Left & Right Channel
-                for (int c = 0; c < 2; c++) {
 
-                }
+
+            byte[] audioBytes = new byte[dataChunkSize];
+            is.readFully(audioBytes);
+            is.close();
+
+            // Wraps the audioBytes in a ByteBuffer
+            ByteBuffer byteBuffer = ByteBuffer.wrap(audioBytes);
+            byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+
+            // Extracts the 16-bit audio samples
+            int numSamples = dataChunkSize / 2;
+            samples = new short[numSamples];
+
+            for (int i = 0; i < numSamples; i++) {
+                samples[i] = byteBuffer.getShort();
             }
 
         } catch (FileNotFoundException fnf) {
@@ -95,7 +101,11 @@ public class WavFileDecoder {
         System.out.println("Bits per Sample: " + bitsPerSample + " bits");
         System.out.println("DATA CHUNK");
         System.out.println("Chunk ID: " + new String(dataID));
-        System.out.println("Data Size: " + dataSize + " bytes (" + ((dataSize / 1024) / 1024) + " MB)");
+        System.out.println("Data Size: " + dataChunkSize + " bytes (" + ((dataChunkSize / 1024) / 1024) + " MB)");
+        System.out.println("Data Sample:");
+        for (short sample : samples) {
+            System.out.print(sample + " | ");
+        }
     } // printWavFIleContents
 
 
