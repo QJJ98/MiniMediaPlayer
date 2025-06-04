@@ -49,26 +49,35 @@ public class WavFileDecoder {
             is.readFully(dataID);
             dataChunkSize = Integer.reverseBytes(is.readInt());
 
-            // Decode PCM Samples
+            int bytesPerSample = 2; // 2 bytes for 16-bit PCM
+            int chunkSize = 4096; // 4 KB chunk size
 
-            // We know bytes per sample from extraction earlier (16 bits in this example)
-            // (16 bit-stereo = 2 bytes per channel x 2 channels = 4 bytes per frame)
+            byte[] buffer = new byte[chunkSize];
 
+            int rem = dataChunkSize; // Remaining bytes to read from data chunk
+            samples = new short[dataChunkSize / (bitsPerSample / 8)];
+            int i = 0;
+            while (rem > 0) {
+                int bytesToRead = Math.min(rem, buffer.length); // Bytes to be read
+                int bytesRead = is.read(buffer, 0, bytesToRead); // Bytes already read
 
-            byte[] audioBytes = new byte[dataChunkSize];
-            is.readFully(audioBytes);
-            is.close();
+                // If the return value of is.read is -1 (at end of file), then break loop
+                if (bytesRead == -1) {
+                    break;
+                }
 
-            // Wraps the audioBytes in a ByteBuffer
-            ByteBuffer byteBuffer = ByteBuffer.wrap(audioBytes);
-            byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+                // Wrap buffer in ByteBuffer and set to little-endian
+                ByteBuffer byteBuffer = ByteBuffer.wrap(buffer, 0, bytesRead);
+                byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-            // Extracts the 16-bit audio samples
-            int numSamples = dataChunkSize / 2;
-            samples = new short[numSamples];
+                // Process samples (every 2 bytes is equal to 1 sample)
+                while (byteBuffer.remaining() >= bytesPerSample) {
+                    samples[i] = byteBuffer.getShort();
+                    i++;
+                }
 
-            for (int i = 0; i < numSamples; i++) {
-                samples[i] = byteBuffer.getShort();
+                rem -= bytesRead;
+
             }
 
         } catch (FileNotFoundException fnf) {
